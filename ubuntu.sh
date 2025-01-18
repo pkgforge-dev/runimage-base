@@ -49,7 +49,7 @@
  rm -rvf "/tmp/runimage" 2>/dev/null
  "./runimage" bash -c "build_image"
  #Rebuild [Dwarfs ZSTD 22]
- "./runimage" bash -c "rim-build --bsize '22' --clvl '22' --dwfs '/tmp/runimage'"
+ "./runimage" rim-build --bsize '22' --clvl '22' --dwfs '/tmp/runimage'
  echo "/tmp/runimage" | xargs -I "{}" bash -c 'du -sh "{}" && file "{}" && sha256sum "{}"'
 ##End
  set +x
