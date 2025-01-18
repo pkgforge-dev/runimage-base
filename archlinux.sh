@@ -36,10 +36,10 @@
     pacman -y --sync --refresh --refresh --sysupgrade --noconfirm
     #pacman -S "${BASE_PKGS[@]}" --needed --noconfirm 
     for pkg in "${BASE_PKGS[@]}"; do pacman -S "${pkg}" --needed --noconfirm 2>/dev/null; done
-   #Cleanup
-    pacman -Rsn base-devel --noconfirm 2>/dev/null
-    pacman -Rsn perl --noconfirm 2>/dev/null
-    pacman -Rsn python --noconfirm 2>/dev/null
+   ##Cleanup
+   # pacman -Rsn base-devel --noconfirm 2>/dev/null
+   # pacman -Rsn perl --noconfirm 2>/dev/null
+   # pacman -Rsn python --noconfirm 2>/dev/null  
     pacman -Scc --noconfirm 2>/dev/null
     rim-shrink --all --verbose 2>/dev/null
    ##Config
