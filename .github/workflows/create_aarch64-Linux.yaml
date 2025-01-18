@@ -1,4 +1,4 @@
-name: 🐬 Create RunImage Images (x86_64) 🐬
+name: 🐬 Create RunImage Images (aarch64) 🐬
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
@@ -8,8 +8,9 @@ on:
   schedule:
    - cron: "0 0 */3 * *" #every 3 Days @5:45 AM NPT
 jobs:
-  push-x86_64:
-    runs-on: ubuntu-latest
+  push-aarch64:
+    #runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 200
     permissions:
       attestations: write  
@@ -22,37 +23,27 @@ jobs:
         include:
           - image: "alpine"
             script: "${GITHUB_WORKSPACE}/main/alpine.sh"
-            arch: "x86_64"
+            arch: "aarch64"
             file: "/tmp/runimage"
 
           - image: "archlinux"
             script: "${GITHUB_WORKSPACE}/main/archlinux.sh"
-            arch: "x86_64"
-            file: "/tmp/runimage"
-
-          - image: "artix"
-            script: "${GITHUB_WORKSPACE}/main/artix.sh"
-            arch: "x86_64"
-            file: "/tmp/runimage"
-
-          - image: "cachyos"
-            script: "${GITHUB_WORKSPACE}/main/cachyos.sh"
-            arch: "x86_64"
+            arch: "aarch64"
             file: "/tmp/runimage"
 
           - image: "debian"
             script: "${GITHUB_WORKSPACE}/main/debian.sh"
-            arch: "x86_64"
+            arch: "aarch64"
             file: "/tmp/runimage"
 
           - image: "eweos"
             script: "${GITHUB_WORKSPACE}/main/eweos.sh"
-            arch: "x86_64"
+            arch: "aarch64"
             file: "/tmp/runimage"
 
           - image: "ubuntu"
             script: "${GITHUB_WORKSPACE}/main/ubuntu.sh"
-            arch: "x86_64"
+            arch: "aarch64"
             file: "/tmp/runimage"
 
     steps:
