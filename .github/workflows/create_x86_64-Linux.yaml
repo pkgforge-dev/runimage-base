@@ -76,6 +76,17 @@ jobs:
           echo "USER_AGENT=${USER_AGENT}" >> "${GITHUB_ENV}"
         continue-on-error: true
 
+      - name: Disable apparmor_restrict_unprivileged_userns
+        run: |
+          #presets
+          set +x ; set +e
+          #-------------#        
+          echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee "/etc/sysctl.d/98-apparmor-unuserns.conf"
+          echo "0" | sudo tee "/proc/sys/kernel/apparmor_restrict_unprivileged_userns"
+          sudo service procps restart
+          sudo sysctl -p "/etc/sysctl.conf"
+        continue-on-error: true
+
       - name: Create (${{ matrix.image }}/${{ matrix.arch }})
         run: |
           #presets
@@ -102,7 +113,7 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Fail (If Push Failed)
+      - name: Fail (If Create Failed)
         if: env.HAS_RUNIMAGE == 'FALSE'
         run: |
           #presets
