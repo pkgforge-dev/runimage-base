@@ -37,6 +37,7 @@
     #DEBIAN_FRONTEND="noninteractive" apt install -f "${BASE_PKGS[@]}" -y --no-install-recommends --ignore-missing
     for pkg in "${BASE_PKGS[@]}"; do DEBIAN_FRONTEND="noninteractive" apt install -f "${pkg}" -y --no-install-recommends --ignore-missing 2>/dev/null; done
    #Cleanup
+    curl -qfsSL "https://raw.githubusercontent.com/VHSgunzo/runimage-fake-sudo-pkexec/refs/heads/main/usr/bin/sudo" -o "/usr/bin/sudo" && chmod -v "a+x" "/usr/bin/sudo"
     apt purge locales perl -y ; apt autoremove -y ; apt autoclean -y
     apt list --installed
     apt clean -y

@@ -30,6 +30,9 @@
    #Fix & Patches
     echo -e "nameserver 8.8.8.8\nnameserver 2620:0:ccc::2" | tee "/etc/resolv.conf"
     echo -e "nameserver 1.1.1.1\nnameserver 2606:4700:4700::1111" | tee -a "/etc/resolv.conf"
+    ln -sfr "${RIM_ROOTFS}/usr/lib/libc.so" "${RIM_ROOTFS}/usr/lib/ld-musl-x86_64.so.1"
+    #curl -qfsSL "https://bin.pkgforge.dev/$(uname -m)/grep" -o "${RIM_ROOTFS}/sharun/shared/bin/grep"
+    #curl -qfsSL "https://bin.pkgforge.dev/$(uname -m)/gawk" -o "${RIM_ROOTFS}/sharun/shared/bin/gawk"
    #Requirements
     BASE_PKGS=(bash binutils coreutils curl file findutils gawk gocryptfs grep gzip iproute2 iptables iputils jq kmod libnotify lsof lz4 nftables openresolv patchelf procps-ng slirp4netns sed socat tar util-linux which xorg-xhost xz zstd)
     pacman -Scc --noconfirm ; rm "/var/lib/pacman/sync/"*
