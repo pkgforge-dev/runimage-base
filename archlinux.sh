@@ -17,7 +17,6 @@
  "./runimage" getdimg --extract rootfs "pkgforge/archlinux-base:$(uname -m)"
  RIM_NO_NET="0"
  RIM_NO_NVIDIA_CHECK="1"
- RIM_OVERFS_MODE="1"
  RIM_ROOT="1"
  RIM_ROOTFS="$(find '.' -maxdepth 1 -type d -iname "*root*" -exec sh -c '[ -d "{}" ] && realpath "{}"' \; | head -n 1 | tr -d '[:space:]')"
  export RIM_NO_NET RIM_NO_NVIDIA_CHECK RIM_OVERFS_MODE RIM_ROOTFS RIM_ROOT
@@ -43,13 +42,15 @@
     pacman -Rsn python --noconfirm 2>/dev/null
     pacman -Scc --noconfirm 2>/dev/null
     rim-shrink --all --verbose 2>/dev/null
-   #Rebuild [Dwarfs ZSTD 22]
-    rim-build --bsize '24' --clvl '22' --dwfs "/tmp/runimage"
+   ##Config
+   # echo 'RIM_OVERFS_MODE="1"' > "${RUNDIR}/config/Run.rcfg"
   }
  export -f build_image
 ##Rebuild
  rm -rvf "/tmp/runimage" 2>/dev/null
  "./runimage" bash -c "build_image"
+ #Rebuild [Dwarfs ZSTD 22]
+ "./runimage" bash -c "rim-build --bsize '22' --clvl '22' --dwfs '/tmp/runimage'"
  echo "/tmp/runimage" | xargs -I "{}" bash -c 'du -sh "{}" && file "{}" && sha256sum "{}"'
 ##End
  set +x
