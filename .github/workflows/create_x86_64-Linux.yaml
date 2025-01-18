@@ -1,0 +1,164 @@
+name: 🐬 Create RunImage Images (x86_64) 🐬
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  schedule:
+   - cron: "0 0 */3 * *" #every 3 Days @5:45 AM NPT
+jobs:
+  push-x86_64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    permissions:
+      attestations: write  
+      contents: write
+      id-token: write
+      packages: write
+      statuses: read
+    strategy:
+      matrix:
+        include:
+          - image: "alpine"
+            script: "${GITHUB_WORKSPACE}/main/alpine.sh"
+            arch: "x86_64"
+            file: "/tmp/alpine-x86_64"
+
+          - image: "archlinux"
+            script: "${GITHUB_WORKSPACE}/main/archlinux.sh"
+            arch: "x86_64"
+            file: "/tmp/archlinux-x86_64"
+
+          - image: "artix"
+            script: "${GITHUB_WORKSPACE}/main/artix.sh"
+            arch: "x86_64"
+            file: "/tmp/artix-x86_64"
+
+          - image: "cachyos"
+            script: "${GITHUB_WORKSPACE}/main/cachyos.sh"
+            arch: "x86_64"
+            file: "/tmp/cachyos-x86_64"
+
+          - image: "debian"
+            script: "${GITHUB_WORKSPACE}/main/debian.sh"
+            arch: "x86_64"
+            file: "/tmp/debian-x86_64"
+
+          - image: "eweos"
+            script: "${GITHUB_WORKSPACE}/main/eweos.sh"
+            arch: "x86_64"
+            file: "/tmp/eweos-x86_64"
+
+          - image: "ubuntu"
+            script: "${GITHUB_WORKSPACE}/main/ubuntu.sh"
+            arch: "x86_64"
+            file: "/tmp/ubuntu-x86_64"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: main
+          filter: "blob:none"
+
+      - name: Setup Env
+        run: |
+          #presets
+          set +x ; set +e
+          #-------------#
+          #tmp
+          SYSTMP="$(dirname $(mktemp -u))" && export SYSTMP="${SYSTMP}"
+          echo "SYSTMP=${SYSTMP}" >> "${GITHUB_ENV}"
+          #-------------#
+          ##User-Agent
+          USER_AGENT="$(curl -qfsSL 'https://pub.ajam.dev/repos/Azathothas/Wordlists/Misc/User-Agents/ua_chrome_macos_latest.txt')" && export USER_AGENT="${USER_AGENT}"
+          echo "USER_AGENT=${USER_AGENT}" >> "${GITHUB_ENV}"
+        continue-on-error: true
+
+      - name: Create (${{ matrix.image }}/${{ matrix.arch }})
+        run: |
+          #presets
+          set +x ; set +e
+          #-------------#
+          dos2unix --quiet "${{ matrix.script }}"
+          chmod +x "${{ matrix.script }}"
+          bash "${{ matrix.script }}"
+        continue-on-error: true
+
+      - name: Check
+        run: |
+          #presets
+          set +x ; set +e
+          #-------------#
+          if [[ -s "${{ matrix.file }}" ]] && [[ $(stat -c%s "${{ matrix.file }}") -gt 10000 ]]; then
+           export HAS_RUNIMAGE="TRUE"
+           echo "HAS_RUNIMAGE=${HAS_RUNIMAGE}" >> "${GITHUB_ENV}"
+           UTC_TIME="$(TZ='UTC' date +'%Y_%m_%d')"
+           echo "UTC_TIME=${UTC_TIME}" >> "${GITHUB_ENV}"
+          else
+           export HAS_RUNIMAGE="FALSE"
+           echo "HAS_RUNIMAGE=${HAS_RUNIMAGE}" >> "${GITHUB_ENV}"
+          fi
+        continue-on-error: true
+
+      - name: Fail (If Push Failed)
+        if: env.HAS_RUNIMAGE == 'FALSE'
+        run: |
+          #presets
+          set +x ; set +e
+          #-------------#
+          exit 1
+        continue-on-error: false
+
+      #Artifacts
+      - name: Upload (Build) Artifacts
+        if: env.HAS_RUNIMAGE == 'TRUE'
+        uses: actions/upload-artifact@v4
+        with:
+            name: "ARTIFACTS-${{ matrix.image }}_${{ matrix.arch }}"
+            path: |
+              ${{ matrix.file }}
+            compression-level: 0 #no compression, [Default: 6 (GNU Gzip)]
+            retention-days: 90 #max
+            overwrite: true
+        continue-on-error: true
+
+     #continuous
+      - name: Releaser (Continuous)
+        if: env.HAS_RUNIMAGE == 'TRUE'
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          name: "Continuous ${{ matrix.image }}_${{ matrix.arch }}"
+          tag_name: "${{ matrix.image }}_${{ matrix.arch }}"
+          prerelease: true
+          draft: false
+          generate_release_notes: false
+          files: |
+            ${{ matrix.file }}
+        continue-on-error: true
+
+     #Snapshot
+      - name: Releaser (Snapshot)
+        if: env.HAS_RUNIMAGE == 'TRUE'
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          name: "Snapshot-(${{ matrix.image }}_${{ matrix.arch }}_${{ env.UTC_TIME }}"
+          tag_name: "${{ matrix.image }}_${{ matrix.arch }}_${{ env.UTC_TIME }}"
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          make_latest: false
+          files: |
+            ${{ matrix.file }}
+        continue-on-error: true
+
+     #Build Provenance
+      - name: Attest Build Provenance
+        if: env.HAS_RUNIMAGE == 'TRUE'
+        uses: actions/attest-build-provenance@v2.1.0
+        with:
+          subject-name: "image-${{ matrix.image }}-${{ matrix.arch }}"
+          subject-path: ${{ matrix.file }}
+          show-summary: true
+        continue-on-error: true
