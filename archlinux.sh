@@ -25,7 +25,9 @@
   exit 1 
  fi
 ##Fake Nvidia Driver
- curl -qfsSL "https://github.com/VHSgunzo/runimage-fake-nvidia-driver/raw/refs/heads/main/fake-nvidia-driver.tar" | tar -xvf- -C "${RIM_ROOTFS}"
+ if [[ "$(uname -m | tr -d '[:space:]')" == "x86_64" ]]; then
+   curl -qfsSL "https://github.com/VHSgunzo/runimage-fake-nvidia-driver/raw/refs/heads/main/fake-nvidia-driver.tar" | tar -xvf- -C "${RIM_ROOTFS}"
+ fi
 ##Base Deps
  build_image()
   {
