@@ -6,14 +6,14 @@ concurrency:
 on:
   workflow_dispatch:
   schedule:
-   - cron: "0 */12 * * *"  # Every 12 Hrs
+   - cron: "0 10 1/7 * *"  # Every week
 jobs:
   push-aarch64:
     #runs-on: ubuntu-latest
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 200
     permissions:
-      attestations: write  
+      attestations: write
       contents: write
       id-token: write
       packages: write
@@ -75,7 +75,7 @@ jobs:
         run: |
           #presets
           set +x ; set +e
-          #-------------#        
+          #-------------#
           echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee "/etc/sysctl.d/98-apparmor-unuserns.conf"
           echo "0" | sudo tee "/proc/sys/kernel/apparmor_restrict_unprivileged_userns"
           sudo service procps restart
